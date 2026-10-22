@@ -1,0 +1,33 @@
+#!/bin/sh
+# Sole-author guard (see CLAUDE.md "Git と作者").
+# Rejects a commit unless BOTH author and committer are the owner identity,
+# and rejects tool/co-author attribution in the commit message.
+# Enable in a fresh clone:  git config core.hooksPath .githooks
+
+WANT_NAME="koukenhou"
+WANT_EMAIL="koukenhou.gpt@gmail.com"
+msgfile="$1"
+
+fail() {
+    echo "commit rejected: $1" >&2
+    echo "  this repository allows only: $WANT_NAME <$WANT_EMAIL>" >&2
+    exit 1
+}
+
+for kind in AUTHOR COMMITTER; do
+    ident=$(git var "GIT_${kind}_IDENT") || exit 1
+    name=${ident%% <*}
+    rest=${ident#*<}
+    email=${rest%%>*}
+    if [ "$name" != "$WANT_NAME" ] || [ "$email" != "$WANT_EMAIL" ]; then
+        fail "GIT_${kind} is '$name <$email>'"
+    fi
+done
+
+if grep -qiE '^[[:space:]]*(co-authored-by|claude-session)[[:space:]]*:' "$msgfile"; then
+    fail "the message contains a Co-Authored-By / Claude-Session trailer (sole author only)"
+fi
+if grep -qiE 'generated with[^a-z]*(\[)?claude' "$msgfile"; then
+    fail "the message contains a 'Generated with Claude' attribution (sole author only)"
+fi
+exit 0

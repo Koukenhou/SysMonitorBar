@@ -1,0 +1,13 @@
+{
+  "env": {
+    "GIT_AUTHOR_NAME": "koukenhou",
+    "GIT_AUTHOR_EMAIL": "koukenhou.gpt@gmail.com",
+    "GIT_COMMITTER_NAME": "koukenhou",
+    "GIT_COMMITTER_EMAIL": "koukenhou.gpt@gmail.com"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  }
+}
