@@ -2,3 +2,11 @@ __pycache__/
 *.pyc
 .claude/settings.local.json
 .env
+
+# .NET
+bin/
+obj/
+publish/
+*.user
+.vs/
+TestResults/

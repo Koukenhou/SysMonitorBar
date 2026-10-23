@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <!-- Release symbols live inside the dll, so publish output is just the exe. -->
+    <DebugType Condition="'$(Configuration)' == 'Release'">embedded</DebugType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>Assets\SysMonitorBar.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- WFO0003 asks WinForms apps to set DPI in code; this is a WPF app, so the manifest declares it (PerMonitorV2). -->
+    <NoWarn>$(NoWarn);WFO0003</NoWarn>
+    <!-- DXGI is called through COM vtable function pointers (Infrastructure/Metrics/DxgiAdapters.cs). -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Product>SysMonitorBar</Product>
+    <Version>0.1.0</Version>
+    <Copyright>Copyright (c) 2026 koukenhou</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- WPF and WinForms share type names (Application, MessageBox, ...); only WPF is imported implicitly. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\SysMonitorBar.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SysMonitorBar.Core\SysMonitorBar.Core.csproj" />
+  </ItemGroup>
+
+</Project>

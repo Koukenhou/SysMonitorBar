@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="NoMetricsSelected" xml:space="preserve"><value>表示項目が選択されていません</value></data>
+  <data name="DiskFreeFormat" xml:space="preserve"><value>{0}: 空き {1} GB</value></data>
+  <data name="BarSampledAtFormat" xml:space="preserve"><value>取得時刻: {0:HH:mm:ss}</value></data>
+  <data name="BarSimulatedNote" xml:space="preserve"><value>※ 模擬データを表示しています</value></data>
+  <data name="AppName" xml:space="preserve"><value>SysMonitorBar</value></data>
+  <data name="TrayShowBar" xml:space="preserve"><value>バーを表示</value></data>
+  <data name="TraySettings" xml:space="preserve"><value>設定...</value></data>
+  <data name="TrayStartWithWindows" xml:space="preserve"><value>Windows 起動時に開始</value></data>
+  <data name="TrayExit" xml:space="preserve"><value>終了</value></data>
+  <data name="SettingsCorruptNotice" xml:space="preserve"><value>設定ファイルを読み込めなかったため、既定の設定で起動しました。元のファイルは {0} に退避しました。</value></data>
+  <data name="SettingsSaveFailed" xml:space="preserve"><value>設定を保存できませんでした: {0}</value></data>
+  <data name="SettingsTitle" xml:space="preserve"><value>SysMonitorBar の設定</value></data>
+  <data name="SectionMetrics" xml:space="preserve"><value>表示項目</value></data>
+  <data name="SectionAppearance" xml:space="preserve"><value>外観</value></data>
+  <data name="SectionBehavior" xml:space="preserve"><value>動作</value></data>
+  <data name="GroupCpu" xml:space="preserve"><value>CPU</value></data>
+  <data name="GroupGpu" xml:space="preserve"><value>GPU</value></data>
+  <data name="GroupMemory" xml:space="preserve"><value>メモリ</value></data>
+  <data name="GroupDisk" xml:space="preserve"><value>ディスク</value></data>
+  <data name="MetricCpuUsage" xml:space="preserve"><value>使用率</value></data>
+  <data name="MetricGpuUsage" xml:space="preserve"><value>使用率</value></data>
+  <data name="MetricVramUsedTotal" xml:space="preserve"><value>専用メモリ（使用量/総量）</value></data>
+  <data name="MetricVramPercent" xml:space="preserve"><value>専用メモリ（使用率）</value></data>
+  <data name="MetricMemoryUsedTotal" xml:space="preserve"><value>使用量/総量</value></data>
+  <data name="MetricMemoryPercent" xml:space="preserve"><value>使用率</value></data>
+  <data name="MetricDiskUsedPercent" xml:space="preserve"><value>{0}: 使用率</value></data>
+  <data name="MetricDiskFree" xml:space="preserve"><value>{0}: 空き容量</value></data>
+  <data name="UnavailableSuffix" xml:space="preserve"><value>（現在は利用できません）</value></data>
+  <data name="NoFixedDrives" xml:space="preserve"><value>固定ディスクが見つかりません</value></data>
+  <data name="BackgroundOpacity" xml:space="preserve"><value>背景の不透明度</value></data>
+  <data name="FontSize" xml:space="preserve"><value>文字サイズ</value></data>
+  <data name="AlwaysOnTop" xml:space="preserve"><value>常に手前に表示</value></data>
+  <data name="ShowSeparator" xml:space="preserve"><value>区切り線を表示</value></data>
+  <data name="RefreshInterval" xml:space="preserve"><value>更新間隔</value></data>
+  <data name="IntervalSecondsFormat" xml:space="preserve"><value>{0} 秒</value></data>
+  <data name="FastIntervalWarning" xml:space="preserve"><value>0.5 秒は負荷が高くなります。</value></data>
+  <data name="PauseWhenHidden" xml:space="preserve"><value>バーを隠している間は更新を止める</value></data>
+  <data name="StartWithWindows" xml:space="preserve"><value>Windows 起動時に開始</value></data>
+
+  <data name="RestoreDefaults" xml:space="preserve"><value>既定に戻す</value></data>
+  <data name="Cancel" xml:space="preserve"><value>キャンセル</value></data>
+  <data name="Apply" xml:space="preserve"><value>適用</value></data>
+  <data name="Ok" xml:space="preserve"><value>OK</value></data>
+  <data name="TooltipSourceFormat" xml:space="preserve"><value>{0}: {1}</value></data>
+  <data name="TooltipUnavailableFormat" xml:space="preserve"><value>{0}: 取得できません（{1}）</value></data>
+  <data name="GpuGroupSelect" xml:space="preserve"><value>使用する GPU</value></data>
+  <data name="GpuAuto" xml:space="preserve"><value>自動（専用メモリが最も大きい GPU）</value></data>
+  <data name="GpuAutoWithName" xml:space="preserve"><value>自動（現在: {0}）</value></data>
+  <data name="GpuNotFound" xml:space="preserve"><value>GPU が見つかりません</value></data>
+  <data name="GpuPreferredMissingFormat" xml:space="preserve"><value>選んだ GPU が見つからないため {0} を使用</value></data>
+  <data name="ReasonNoGpu" xml:space="preserve"><value>GPU が見つかりません</value></data>
+  <data name="ReasonNoGpuCounter" xml:space="preserve"><value>この GPU の使用状況を Windows が報告していません</value></data>
+  <data name="ReasonDriveNotReady" xml:space="preserve"><value>ドライブを読み取れません</value></data>
+  <data name="ReasonWarmingUp" xml:space="preserve"><value>計測を開始しています</value></data>
+  <data name="DriveLabelFormat" xml:space="preserve"><value>{0} ドライブ</value></data>
+  <data name="StartupChangeFailed" xml:space="preserve"><value>Windows 起動時の設定を変更できませんでした: {0}</value></data>
+</root>

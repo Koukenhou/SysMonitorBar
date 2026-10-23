@@ -1,0 +1,571 @@
+<title>SysMonitorBar 動作確認チェックリスト</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+JP:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one narrow column of test sections; a sticky progress strip; each item is a row with a status switch and a comment box. */
+:root {
+  --bg: #f2f4f7;
+  --surface: #ffffff;
+  --ink: #1b2027;
+  --muted: #5a6472;
+  --line: #d8dde4;
+  --accent: #2c6bd3;
+  --ok: #23824f;
+  --ok-soft: #e3f3ea;
+  --ng: #bf3d29;
+  --ng-soft: #fbe8e4;
+  --hold: #a86d12;
+  --hold-soft: #f8eedb;
+  --done: #4a5a70;
+  --done-soft: #e7ecf3;
+  --bar-bg: rgba(32, 36, 44, 0.86);
+  --bar-ink: #f5f7fa;
+  --font-body: "IBM Plex Sans JP", "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14171c; --surface: #1d2229; --ink: #e7ebf0; --muted: #9aa4b1; --line: #2d343e;
+    --accent: #6fa6fb; --ok: #5cc48a; --ok-soft: #173326; --ng: #f07a64; --ng-soft: #3a1f1a;
+    --hold: #e2ae4a; --hold-soft: #352a14; --done: #a9b6c8; --done-soft: #26303c;
+    --bar-bg: rgba(10, 12, 16, 0.9); --bar-ink: #f5f7fa;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14171c; --surface: #1d2229; --ink: #e7ebf0; --muted: #9aa4b1; --line: #2d343e;
+  --accent: #6fa6fb; --ok: #5cc48a; --ok-soft: #173326; --ng: #f07a64; --ng-soft: #3a1f1a;
+  --hold: #e2ae4a; --hold-soft: #352a14; --done: #a9b6c8; --done-soft: #26303c;
+  --bar-bg: rgba(10, 12, 16, 0.9); --bar-ink: #f5f7fa;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.7;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 10; background: var(--bg);
+}
+.wrap {
+  max-width: 880px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+  display: grid;
+  gap: 28px;
+}
+
+/* Header */
+header { display: grid; gap: 14px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin: 0; }
+h1 { font-size: clamp(24px, 4vw, 30px); line-height: 1.3; margin: 0; font-weight: 700; text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); max-width: 62ch; }
+.mini-bar {
+  justify-self: start;
+  max-width: 100%;
+  overflow-x: auto;
+  background: var(--bar-bg);
+  color: var(--bar-ink);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-family: "Segoe UI", var(--font-body);
+  font-size: 13px;
+  white-space: pre;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Preparation */
+.prep { display: grid; gap: 10px; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.prep h2 { font-size: 15px; margin: 0; }
+.prep ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+.cmd { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.cmd code {
+  font-family: var(--font-mono); font-size: 13px; background: var(--bg); border: 1px solid var(--line);
+  border-radius: 6px; padding: 2px 8px; overflow-wrap: anywhere; min-width: 0;
+}
+.copy {
+  font: inherit; font-size: 12px; color: var(--accent); background: none; border: 1px solid var(--line);
+  border-radius: 6px; padding: 1px 8px; cursor: pointer;
+}
+.copy:hover { border-color: var(--accent); }
+
+/* Sticky progress strip */
+.progress {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--bg);
+  padding-block: 10px;
+  border-bottom: 1px solid var(--line);
+  display: grid; gap: 8px;
+}
+.progress-row { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; }
+.counts { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.counts b { font-weight: 600; }
+.c-ok b { color: var(--ok); } .c-ng b { color: var(--ng); } .c-hold b { color: var(--hold); } .c-todo b { color: var(--muted); }
+.meter { height: 6px; border-radius: 3px; background: var(--line); display: flex; overflow: hidden; }
+.meter span { display: block; height: 100%; transition: width 0.25s ease; }
+.m-ok { background: var(--ok); } .m-ng { background: var(--ng); } .m-hold { background: var(--hold); }
+.filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.filters button {
+  font: inherit; font-size: 13px; padding: 2px 12px; border-radius: 999px; cursor: pointer;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+}
+.filters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.save { font-size: 12px; color: var(--muted); }
+.save[data-state="error"], .save[data-state="off"] { color: var(--ng); }
+.save[data-state="saved"] { color: var(--ok); }
+
+/* Sections and items */
+section.group { display: grid; gap: 0; }
+.group-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; padding-bottom: 6px; border-bottom: 2px solid var(--ink); }
+.group-head h2 { font-size: 18px; margin: 0; }
+.group-head .scope { font-size: 13px; color: var(--muted); }
+.group-head .tally { margin-left: auto; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+
+.item { display: grid; gap: 8px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.item[hidden] { display: none; }
+.item-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 12px; align-items: start; }
+.code { font-family: var(--font-mono); font-size: 13px; color: var(--muted); padding-top: 2px; min-width: 2.6em; }
+.text { margin: 0; min-width: 0; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.tag { font-family: var(--font-mono); font-size: 11px; border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; color: var(--muted); white-space: nowrap; }
+.tag.pre { border-color: transparent; background: var(--done-soft); color: var(--done); font-family: var(--font-body); }
+.hint { margin: 0 0 0 calc(2.6em + 12px); font-size: 13px; color: var(--muted); }
+.hint code { font-family: var(--font-mono); font-size: 12px; overflow-wrap: anywhere; }
+
+.controls { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; margin-left: calc(2.6em + 12px); align-items: start; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button {
+  font: inherit; font-size: 13px; font-weight: 600; padding: 4px 14px; cursor: pointer;
+  background: transparent; color: var(--muted); border: 0; border-right: 1px solid var(--line);
+}
+.seg button:last-child { border-right: 0; }
+.seg button:hover { color: var(--ink); }
+.seg button[data-v="ok"][aria-pressed="true"] { background: var(--ok-soft); color: var(--ok); }
+.seg button[data-v="ng"][aria-pressed="true"] { background: var(--ng-soft); color: var(--ng); }
+.seg button[data-v="hold"][aria-pressed="true"] { background: var(--hold-soft); color: var(--hold); }
+textarea {
+  font: inherit; font-size: 14px; line-height: 1.5; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 8px; padding: 5px 10px; width: 100%; min-width: 0;
+  resize: vertical; min-height: 34px; height: 34px;
+}
+textarea:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.notes { display: grid; gap: 8px; }
+.notes h2 { font-size: 18px; margin: 0; }
+.notes textarea { height: 96px; }
+footer { font-size: 13px; color: var(--muted); display: grid; gap: 4px; }
+.empty { padding: 24px 0; color: var(--muted); text-align: center; }
+
+@media (max-width: 560px) {
+  .item-head { grid-template-columns: auto minmax(0, 1fr); }
+  .tags { grid-column: 2; justify-content: flex-start; }
+  .controls { grid-template-columns: minmax(0, 1fr); margin-left: 0; }
+  .hint { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .meter span { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">SysMonitorBar · Stage C · Manual test</p>
+    <h1>動作確認チェックリスト</h1>
+    <p class="lede">段階 C（自動起動・DPI・スリープ・ログ）と段階 B（実測値）の確認項目です。各項目を実際のアプリで試し、結果を OK / NG / 保留 で記録してください。気づいたことはコメント欄へ。入力内容は自動で保存され、Claude が後から読み取って修正に使います。段階 A の項目は確認済みのため、下にまとめて残しています。</p>
+    <div class="mini-bar" aria-label="バーの表示例">CPU 18% | GPU  6% | RAM  9.5/15.9 GB | VRAM 1.8/4.0 GB | C: 62%</div>
+  </header>
+
+  <section class="prep" aria-labelledby="prep-h">
+    <h2 id="prep-h">準備</h2>
+    <ul>
+      <li>
+        <div class="cmd">起動：<code id="cmd-run">dotnet run --project src/SysMonitorBar</code><button class="copy" type="button" data-copy="cmd-run">コピー</button></div>
+      </li>
+      <li>
+        <div class="cmd">設定ファイル：<code id="cmd-path">%LocalAppData%\SysMonitorBar\settings.json</code><button class="copy" type="button" data-copy="cmd-path">コピー</button></div>
+      </li>
+      <li>比較用にタスクマネージャー（Ctrl+Shift+Esc）の「パフォーマンス」タブを開いておきます。バーと更新のタイミングが違うため、数 % のずれは正常です。</li>
+      <li>模擬データで動かすとき：<code>dotnet run --project src/SysMonitorBar -- --simulate</code></li>
+      <li>再ビルドの前に、トレイの「終了」でアプリを止めてください（exe がロックされます）。</li>
+    </ul>
+  </section>
+
+  <div class="progress" role="region" aria-label="進み具合">
+    <div class="progress-row">
+      <div class="counts" id="counts"></div>
+      <span class="save" id="save" data-state="loading" role="status">読み込み中…</span>
+    </div>
+    <div class="meter" aria-hidden="true"><span class="m-ok" id="m-ok"></span><span class="m-ng" id="m-ng"></span><span class="m-hold" id="m-hold"></span></div>
+    <div class="filters" role="group" aria-label="表示する項目">
+      <button type="button" data-filter="all" aria-pressed="true">すべて</button>
+      <button type="button" data-filter="todo" aria-pressed="false">未確認</button>
+      <button type="button" data-filter="issue" aria-pressed="false">NG・保留</button>
+    </div>
+  </div>
+
+  <main id="list"></main>
+  <p class="empty" id="empty" hidden>この条件に当てはまる項目はありません。</p>
+
+  <section class="notes" aria-labelledby="notes-h">
+    <h2 id="notes-h">全体メモ</h2>
+    <textarea id="notes" placeholder="項目に当てはまらない気づき、環境（モニター構成・DPI など）、次に直してほしい順番など"></textarea>
+  </section>
+
+  <footer>
+    <span>「確認済み」は Claude が 2026-10-22 に自動で確かめた項目です。手元でも試せたら OK を付けてください。</span>
+    <span>段階 C で扱う項目：DPI・複数モニターの変化、自動起動、スリープからの復帰、長時間運転（T08, T13, T14）。</span>
+  </footer>
+</div>
+
+<script>
+const SECTIONS = [
+  { id: "c1", title: "C · Windows 起動時に開始", scope: "T13", items: [
+    { id: "C1-1", text: "トレイメニューの「Windows 起動時に開始」をクリックするとチェックが付き、設定画面のチェックも付いている" },
+    { id: "C1-2", t: "T13", text: "オンにしてサインアウト → サインインすると、SysMonitorBar が自動で起動する" },
+    { id: "C1-3", t: "T13", text: "オフにすると登録が消える", hint: "reg query HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v SysMonitorBar を実行し、「見つかりません」と出れば OK。" },
+    { id: "C1-4", text: "タスクマネージャーの「スタートアップ アプリ」で無効にすると、トレイメニューを開き直したときにチェックが外れている" },
+    { id: "C1-5", pre: true, text: "登録した exe が移動して見つからないとき、起動時に今の exe の場所へ書き直される" },
+  ]},
+  { id: "c2", title: "C · DPI と画面の変化", scope: "T08", items: [
+    { id: "C2-1", t: "T08", text: "サブモニターの拡大率を 125% にすると、そこにあるバーの文字がぼやけず、大きさも合わせて変わる", hint: "設定 → システム → ディスプレイ → 拡大/縮小。確認が終わったら 100% に戻してください。" },
+    { id: "C2-2", text: "拡大率の違うモニターの間でバーをドラッグしても、位置が飛んだり画面外に出たりしない。再起動しても同じ場所に出る" },
+    { id: "C2-3", t: "T08", text: "サブモニターにバーを置いた状態でサブモニターを外す（または「表示画面を複製する」にする）と、バーがメイン画面内に戻り、トレイから操作できる" },
+    { id: "C2-4", text: "解像度を変えても、バーが画面内に収まる" },
+  ]},
+  { id: "c3", title: "C · スリープからの復帰", scope: "§12-4", items: [
+    { id: "C3-1", text: "スリープから復帰したあと、数秒以内に値が更新され、「--」のまま止まらない", hint: "ログに Suspending / Resumed の行が残ります。" },
+  ]},
+  { id: "c4", title: "C · 設定ファイルとログ", scope: "§9 · §12-8", items: [
+    { id: "C4-1", pre: true, text: "settings.json を消して起動すると、起動直後に settings.json が作られている（段階 A の 6-1 の続き）" },
+    { id: "C4-2", pre: "起動と GPU のみ", text: "ログ（%LocalAppData%\\SysMonitorBar\\logs\\SysMonitorBar.log）に起動・終了・使っている GPU が書かれている" },
+  ]},
+  { id: "c5", title: "C · 長時間運転と発行版", scope: "T14 · §15", items: [
+    { id: "C5-1", t: "T14", text: "8 時間動かしても、メモリが増え続けず、ログにエラーが大量に出ていない", hint: "アプリを動かしたまま powershell -ExecutionPolicy Bypass -File tools\\soak.ps1 -Minutes 480 を実行すると soak.csv に記録されます。" },
+    { id: "C5-2", text: "発行版（publish\\win-x64\\SysMonitorBar.exe）を別のフォルダーにコピーして起動しても、問題なく動く" },
+  ]},
+  { id: "b1", title: "B · 実測値の正しさ", scope: "タスクマネージャーと比較", items: [
+    { id: "B1-1", text: "CPU の値が、タスクマネージャーの CPU「使用率」とおおむね一致する", hint: "どちらも % Processor Utility を使っています。動画のエンコードなどで負荷をかけると比べやすくなります。" },
+    { id: "B1-2", text: "GPU の値が、タスクマネージャーの GPU の使用率（グラフ上の %）とおおむね一致し、負荷をかけると上がる", hint: "ゲームや動画再生、ブラウザーの WebGL デモなどで負荷をかけます。" },
+    { id: "B1-3", pre: true, text: "RAM の使用量/総量が、タスクマネージャーのメモリ「使用中」と総量に一致する（総量は 15.9 GB）" },
+    { id: "B1-4", pre: true, text: "VRAM が、タスクマネージャーの「専用 GPU メモリ」に一致し、「共有 GPU メモリ」は含まれていない", hint: "総量は 3.9 GB と表示されます（DXGI が報告する専用メモリ量。タスクマネージャーでは 4.0 GB と丸めて表示されることがあります）。" },
+    { id: "B1-5", pre: true, text: "C: の使用率が、エクスプローラーで C ドライブのプロパティを開いたときの使用領域の割合と一致する" },
+    { id: "B1-6", text: "ほかの固定ドライブ（D: など）があれば、使用率と空き容量が正しく出る" },
+  ]},
+  { id: "b2", title: "B · GPU の選択", scope: "設定画面", items: [
+    { id: "B2-1", text: "設定画面に「使用する GPU」があり、「自動（現在: NVIDIA GeForce GTX 1650）」と表示される" },
+    { id: "B2-2", text: "一覧から GPU を選んで OK を押すと、再起動しても選択が残る" },
+    { id: "B2-3", text: "バーにマウスを乗せると、ツールチップに GPU 名が出る" },
+  ]},
+  { id: "b3", title: "B · 値が取れないとき", scope: "T07 · T09", items: [
+    { id: "B3-1", text: "存在しないドライブを表示項目に入れると「Z: --」と出て、ほかの値は更新され続け、ツールチップに理由が出る", hint: "アプリを終了し、settings.json の metricIds に \"disk.Z.usedPercent\" を足してから起動します。" },
+    { id: "B3-2", text: "USB メモリなどのリムーバブルドライブは、設定画面のディスク一覧に出ない" },
+    { id: "B3-3", text: "どの値も 0 ではなく「--」で表示され、取れない値があってもアプリが落ちない" },
+  ]},
+  { id: "b4", title: "B · 負荷", scope: "設計書 §2.2", items: [
+    { id: "B4-1", pre: true, text: "1 秒間隔で動かしたとき、SysMonitorBar 自身の CPU 使用率が 1% 未満", hint: "Claude の実測：20 秒平均 0.11%。タスクマネージャーの「詳細」タブで確かめられます。" },
+    { id: "B4-2", pre: true, text: "メモリ（ワーキングセット）が 150 MB 未満", hint: "Claude の実測：Debug ビルドで 135 MB。" },
+    { id: "B4-3", text: "更新間隔 0.5 秒でも、操作が重くならない" },
+  ]},
+  { id: "s1", title: "A · 起動・終了", scope: "T01 · T11 · T12", items: [
+    { id: "1-1", t: "T01", pre: true, text: "起動するとトレイアイコンと 1 行のバーが表示され、メインウィンドウは出ない" },
+    { id: "1-2", text: "settings.json が無い状態で起動すると、バーがメイン画面の上端中央（上から 16 DIP）に出る", hint: "準備の手順で settings.json を削除してから起動します。" },
+    { id: "1-3", text: "バーがタスクバーにボタンとして出ない" },
+    { id: "1-4", pre: "スタイルのみ", text: "バーが Alt+Tab の一覧に出ない", hint: "WS_EX_TOOLWINDOW が付いていることは確認済み。実際に Alt+Tab を押して確かめてください。" },
+    { id: "1-5", t: "T11", pre: true, text: "2 回目に起動すると新しいプロセスはすぐ終了し、トレイアイコンは 1 つのまま" },
+    { id: "1-6", text: "バーを隠した状態で 2 回目に起動すると、起動中のアプリがバーを表示する" },
+    { id: "1-7", t: "T12", text: "トレイの「終了」で、トレイアイコンが消えてプロセスも終わる（タスクマネージャーに残らない）" },
+    { id: "1-8", text: "バーを選んだ状態で Alt+F4 を押しても、バーが閉じず、アプリも終了しない" },
+  ]},
+  { id: "s2", title: "A · バーの表示", scope: "T05 · T16", items: [
+    { id: "2-1", pre: true, text: "角が丸く、背景は半透明で、文字ははっきり見える" },
+    { id: "2-2", text: "値が毎秒変わっても、バーの幅がほとんど変わらない（9% → 10% のように桁が増えるとき以外）" },
+    { id: "2-3", text: "マウスを乗せると、全文・取得時刻・「模擬データ」の注記がツールチップに出る" },
+    { id: "2-4", text: "表示項目を全部オフにすると「表示項目が選択されていません」と出て、その状態でもドラッグできる" },
+    { id: "2-5", t: "T16", text: "項目を多く選んでも 1 行のまま、画面幅の 90% で「…」に省略され、ツールチップで全文が読める", hint: "ディスクの空き容量なども全部オンにし、文字サイズを大きくすると確かめやすくなります。" },
+  ]},
+  { id: "s3", title: "A · ドラッグと位置", scope: "T04", items: [
+    { id: "3-1", t: "T04", pre: true, text: "左ボタンでドラッグして動かせ、離すと位置が保存される" },
+    { id: "3-2", t: "T04", text: "再起動すると同じ位置に表示される" },
+    { id: "3-3", text: "サブモニター（1920×1080）に動かしてから再起動しても、サブモニターに表示される" },
+    { id: "3-4", text: "画面の端に寄せても、バーが画面の外にはみ出さない" },
+    { id: "3-5", text: "右端の近くで表示項目を増やしてバーが長くなっても、画面内に収まる" },
+  ]},
+  { id: "s4", title: "A · トレイメニュー", scope: "T02 · T03", items: [
+    { id: "4-1", text: "右クリックすると「SysMonitorBar／バーを表示／設定...／Windows 起動時に開始（グレー）／終了」が出る" },
+    { id: "4-2", text: "「バーを表示」のチェックが、バーの実際の状態と一致している" },
+    { id: "4-3", text: "「バーを表示」をクリックすると、表示と非表示が切り替わる" },
+    { id: "4-4", text: "トレイアイコンのダブルクリックで、表示と非表示が切り替わる" },
+    { id: "4-5", t: "T02", text: "表示・非表示を 20 回繰り返しても、バーが増えず、アプリも終了しない" },
+    { id: "4-6", text: "バーを隠したまま再起動すると、隠れた状態で起動する（トレイアイコンは出る）" },
+    { id: "4-7", t: "T03", text: "「設定...」を何度押しても設定画面は 1 つだけで、すでに開いていれば前面に出る" },
+  ]},
+  { id: "s5", title: "A · 設定画面", scope: "T05 · T06", items: [
+    { id: "5-1", text: "項目（CPU／GPU／メモリ／ディスク）と、固定ディスクのドライブ一覧が正しく出る" },
+    { id: "5-2", text: "チェックや値を変えると、その場でバーに反映される（プレビュー）" },
+    { id: "5-3", t: "T05", text: "背景の不透明度を 20%・80%・100% にしたとき、背景だけが変わり、文字は常にはっきり見える" },
+    { id: "5-4", text: "文字サイズ（10〜24）、常に手前に表示、区切り線の表示が、それぞれ反映される" },
+    { id: "5-5", text: "更新間隔を 0.5 秒にすると、負荷が高くなるという注意が出る" },
+    { id: "5-6", text: "「適用」は、変更があるときだけ押せる" },
+    { id: "5-7", text: "「キャンセル」・Esc・×ボタンで閉じると、変更前の表示に戻り、設定ファイルは変わらない", hint: "settings.json の更新日時が変わらないことで確かめられます。" },
+    { id: "5-8", t: "T06", text: "「OK」と「適用」で変更が保存され、再起動しても残っている" },
+    { id: "5-9", text: "「既定に戻す」で既定値に戻る。ただし、押しただけでは保存されない" },
+    { id: "5-10", text: "「Windows 起動時に開始」はグレーで、操作できない" },
+  ]},
+  { id: "s6", title: "A · 設定ファイル", scope: "T10", items: [
+    { id: "6-1", t: "T10", text: "settings.json を壊して起動すると、settings.corrupt-日時.json に退避され、既定の設定で起動し、トレイに通知が出る", hint: "アプリを終了し、settings.json の先頭の { を消して保存してから起動します。" },
+    { id: "6-2", text: "範囲外の値を書いて起動すると、範囲内の値に直る", hint: "例：\"backgroundOpacity\": 5 → 起動後に 1（100%）になる。" },
+  ]},
+  { id: "s7", title: "A · 非表示中の動作", scope: "T17", items: [
+    { id: "7-1", t: "T17", text: "「バーを隠している間は更新を止める」がオンのとき、隠している間は CPU 使用率がほぼ 0 になり、再表示するとすぐ新しい値が出る", hint: "タスクマネージャーの「詳細」タブで SysMonitorBar.exe の CPU を見ます。" },
+  ]},
+  { id: "s8", title: "A · 発行版", scope: "配布", items: [
+    { id: "8-1", pre: true, text: "publish/win-x64/SysMonitorBar.exe が単独で起動し、メモリ使用量は約 113 MB" },
+    { id: "8-2", text: ".NET が入っていない別の PC でも起動する" },
+  ]},
+];
+
+const LABEL = { ok: "OK", ng: "NG", hold: "保留" };
+const ALL = SECTIONS.flatMap(s => s.items.map(i => ({ ...i, section: s.title })));
+const state = new Map(ALL.map(i => [i.id, { status: "", comment: "" }]));
+let notes = "";
+let filter = "all";
+let db = null;
+
+const $ = id => document.getElementById(id);
+const docId = id => "item-" + id;
+
+/* ---------- render (once) ---------- */
+function build() {
+  const list = $("list");
+  for (const s of SECTIONS) {
+    const sec = document.createElement("section");
+    sec.className = "group";
+    sec.dataset.section = s.id;
+    sec.innerHTML = `<div class="group-head"><h2></h2><span class="scope"></span><span class="tally"></span></div>`;
+    sec.querySelector("h2").textContent = s.title;
+    sec.querySelector(".scope").textContent = s.scope;
+    for (const it of s.items) sec.appendChild(buildItem(it));
+    list.appendChild(sec);
+  }
+}
+
+function buildItem(it) {
+  const el = document.createElement("article");
+  el.className = "item";
+  el.dataset.id = it.id;
+  el.innerHTML = `
+    <div class="item-head"><span class="code"></span><p class="text"></p><span class="tags"></span></div>
+    <div class="controls">
+      <div class="seg" role="group">
+        <button type="button" data-v="ok" aria-pressed="false">OK</button>
+        <button type="button" data-v="ng" aria-pressed="false">NG</button>
+        <button type="button" data-v="hold" aria-pressed="false">保留</button>
+      </div>
+      <textarea rows="1" placeholder="コメント（任意）"></textarea>
+    </div>`;
+  el.querySelector(".code").textContent = it.id;
+  el.querySelector(".text").textContent = it.text;
+  el.querySelector(".seg").setAttribute("aria-label", it.id + " の結果");
+  const ta = el.querySelector("textarea");
+  ta.id = "c-" + it.id;
+  ta.setAttribute("aria-label", it.id + " のコメント");
+  const tags = el.querySelector(".tags");
+  if (it.t) addTag(tags, it.t, "tag");
+  if (it.pre) addTag(tags, it.pre === true ? "確認済み" : "確認済み（" + it.pre + "）", "tag pre");
+  if (it.hint) {
+    const p = document.createElement("p");
+    p.className = "hint";
+    p.textContent = it.hint;
+    el.querySelector(".item-head").after(p);
+  }
+
+  el.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
+    const cur = state.get(it.id);
+    cur.status = cur.status === b.dataset.v ? "" : b.dataset.v;
+    paintItem(it.id);
+    refresh();
+    save(it.id);
+  }));
+  let timer = null;
+  ta.addEventListener("input", () => {
+    state.get(it.id).comment = ta.value;
+    grow(ta);
+    clearTimeout(timer);
+    timer = setTimeout(() => save(it.id), 700);
+  });
+  ta.addEventListener("blur", () => { clearTimeout(timer); if (dirty.has(it.id)) save(it.id); });
+  return el;
+}
+
+function addTag(host, text, cls) {
+  const s = document.createElement("span");
+  s.className = cls;
+  s.textContent = text;
+  host.appendChild(s);
+}
+
+function grow(ta) { ta.style.height = "auto"; ta.style.height = Math.max(34, ta.scrollHeight + 2) + "px"; }
+
+function paintItem(id) {
+  const el = document.querySelector(`.item[data-id="${id}"]`);
+  const st = state.get(id);
+  el.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === st.status)));
+  const ta = el.querySelector("textarea");
+  if (document.activeElement !== ta && ta.value !== st.comment) { ta.value = st.comment; grow(ta); }
+}
+
+function refresh() {
+  const c = { ok: 0, ng: 0, hold: 0, todo: 0 };
+  for (const st of state.values()) c[st.status || "todo"]++;
+  const total = ALL.length;
+  $("counts").innerHTML = "";
+  [["c-ok", "OK", c.ok], ["c-ng", "NG", c.ng], ["c-hold", "保留", c.hold], ["c-todo", "未確認", c.todo]].forEach(([cls, label, n]) => {
+    const s = document.createElement("span");
+    s.className = cls;
+    s.innerHTML = `${label} <b></b>`;
+    s.querySelector("b").textContent = n;
+    $("counts").appendChild(s);
+  });
+  const tot = document.createElement("span");
+  tot.textContent = `全 ${total} 項目`;
+  $("counts").appendChild(tot);
+  $("m-ok").style.width = (c.ok / total * 100) + "%";
+  $("m-ng").style.width = (c.ng / total * 100) + "%";
+  $("m-hold").style.width = (c.hold / total * 100) + "%";
+
+  let shown = 0;
+  for (const s of SECTIONS) {
+    const sec = document.querySelector(`.group[data-section="${s.id}"]`);
+    let visible = 0, done = 0;
+    for (const it of s.items) {
+      const st = state.get(it.id).status;
+      if (st) done++;
+      const show = filter === "all" || (filter === "todo" && !st) || (filter === "issue" && (st === "ng" || st === "hold"));
+      document.querySelector(`.item[data-id="${it.id}"]`).hidden = !show;
+      if (show) visible++;
+    }
+    sec.hidden = visible === 0;
+    sec.querySelector(".tally").textContent = `${done}/${s.items.length}`;
+    shown += visible;
+  }
+  $("empty").hidden = shown > 0;
+}
+
+document.querySelectorAll(".filters button").forEach(b => b.addEventListener("click", () => {
+  filter = b.dataset.filter;
+  document.querySelectorAll(".filters button").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  refresh();
+}));
+
+document.querySelectorAll(".copy").forEach(b => b.addEventListener("click", async () => {
+  const code = $(b.dataset.copy);
+  try {
+    await navigator.clipboard.writeText(code.textContent);
+    b.textContent = "コピーしました";
+  } catch {
+    const r = document.createRange();
+    r.selectNodeContents(code);
+    const sel = getSelection();
+    sel.removeAllRanges();
+    sel.addRange(r);
+    b.textContent = "選択しました";
+  }
+  setTimeout(() => { b.textContent = "コピー"; }, 1500);
+}));
+
+/* ---------- saving ---------- */
+const dirty = new Set();      // ids with unsaved edits
+const inflight = new Map();   // id -> true while a write runs
+let lastError = "";
+
+function setSave(stateName, text) {
+  const s = $("save");
+  s.dataset.state = stateName;
+  s.textContent = text;
+}
+
+function updateSaveLabel() {
+  if (!db) return;
+  if (lastError) setSave("error", "保存できませんでした（" + lastError + "）。もう一度操作すると再試行します。");
+  else if (inflight.size || dirty.size) setSave("saving", "保存中…");
+  else setSave("saved", "すべて保存済み");
+}
+
+async function save(id) {
+  dirty.add(id);
+  if (!db) return;
+  if (inflight.get(id)) return; // the running write re-checks dirty when it finishes
+  inflight.set(id, true);
+  updateSaveLabel();
+  try {
+    while (dirty.has(id)) {
+      dirty.delete(id);
+      if (id === "_notes") {
+        await db.doc("meta/notes").set({ text: notes, updatedAt: new Date().toISOString() });
+      } else {
+        const it = ALL.find(x => x.id === id);
+        const st = state.get(id);
+        await db.doc("results/" + docId(id)).set({
+          id, section: it.section, text: it.text, status: st.status, comment: st.comment,
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    }
+    lastError = "";
+  } catch (e) {
+    lastError = (e && e.code) || "unavailable";
+    dirty.add(id);
+  } finally {
+    inflight.delete(id);
+    updateSaveLabel();
+  }
+}
+
+let notesTimer = null;
+$("notes").addEventListener("input", e => {
+  notes = e.target.value;
+  clearTimeout(notesTimer);
+  notesTimer = setTimeout(() => save("_notes"), 700);
+});
+$("notes").addEventListener("blur", () => { clearTimeout(notesTimer); if (dirty.has("_notes")) save("_notes"); });
+
+/* ---------- live data ---------- */
+async function connect() {
+  try {
+    db = window.claude && window.claude.use ? await window.claude.use("db") : null;
+  } catch { db = null; }
+  if (!db) {
+    setSave("off", "保存できない表示です。claude.ai で開いてください（入力はこの画面にだけ残ります）。");
+    return;
+  }
+  db.collection("results").onSnapshot(snap => {
+    for (const d of snap.docs) {
+      const v = d.data();
+      const id = v && typeof v.id === "string" ? v.id : d.id.replace(/^item-/, "");
+      if (!state.has(id) || dirty.has(id) || inflight.get(id)) continue; // keep local edits in progress
+      state.set(id, { status: LABEL[v.status] ? v.status : "", comment: typeof v.comment === "string" ? v.comment : "" });
+      paintItem(id);
+    }
+    refresh();
+    updateSaveLabel();
+  }, e => setSave("error", "読み込めませんでした（" + e.code + "）。ページを開き直してください。"));
+  db.doc("meta/notes").onSnapshot(snap => {
+    if (dirty.has("_notes") || inflight.get("_notes") || document.activeElement === $("notes")) return;
+    const v = snap.exists ? snap.data() : null;
+    notes = v && typeof v.text === "string" ? v.text : "";
+    $("notes").value = notes;
+  }, () => {});
+}
+
+build();
+ALL.forEach(i => paintItem(i.id));
+refresh();
+connect();
+</script>

@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- Release symbols live inside the dll, so publish output is just the exe. -->
+    <DebugType Condition="'$(Configuration)' == 'Release'">embedded</DebugType>
+    <NeutralLanguage>ja-JP</NeutralLanguage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Strings.resx"
+                      StronglyTypedLanguage="CSharp"
+                      StronglyTypedNamespace="SysMonitorBar.Core.Resources"
+                      StronglyTypedClassName="Strings"
+                      StronglyTypedFileName="$(IntermediateOutputPath)Strings.g.cs"
+                      PublicClass="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="SysMonitorBar.Tests" />
+  </ItemGroup>
+
+</Project>
